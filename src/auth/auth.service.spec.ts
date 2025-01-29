@@ -1,18 +1,34 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { Injectable } from '@nestjs/common';
+import { firestore } from '../firebase/firebase.config';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
-describe('AuthService', () => {
-  let service: AuthService;
+@Injectable()
+export class AuthService {
+  constructor(private jwtService: JwtService) {}
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
-    }).compile();
+  async validateUser(email: string, password: string): Promise<any> {
+    const usersRef = firestore.collection('users');
+    const snapshot = await usersRef.where('email', '==', email).get();
 
-    service = module.get<AuthService>(AuthService);
-  });
+    if (snapshot.empty) {
+      return null;
+    }
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+    const user = snapshot.docs[0].data();
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async login(user: any) {
+    const payload = { email: user.email, role: user.role };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+}
