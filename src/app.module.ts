@@ -4,14 +4,16 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { ConfigModule } from '@nestjs/config';
+import { OpenAIModule } from './openai/openai.module';
 
 @Module({
   imports: [
-      ConfigModule.forRoot({ // .env dosyasını yükler
-        isGlobal: true, // Tüm modüllerde kullanılabilir hale getirir
+      ConfigModule.forRoot({
+        isGlobal: true, 
       }),
       AuthModule,
-      ReservationsModule],
+      ReservationsModule,
+      OpenAIModule],
   controllers: [AppController],
   providers: [AppService],
 })
