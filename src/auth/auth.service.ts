@@ -1,27 +1,30 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as admin from 'firebase-admin';
+import { firestore } from 'src/firebase/firebase.config';
+
 
 @Injectable()
 export class AuthService {
-  private users = [
-    { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
-    { id: 2, username: 'staff', password: 'staff123', role: 'staff' },
-  ];
+  constructor(
+    private readonly jwtService: JwtService
+  ) {}
 
-  constructor(private jwtService: JwtService) {}
+  async validateUser(token: string): Promise<any> {
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      const userRef = firestore.collection('users').doc(decodedToken.uid);
+      const userDoc = await userRef.get();
 
-  validateUser(username: string, pass: string): any {
-    const user = this.users.find(u => u.username === username && u.password === pass);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (!userDoc.exists) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const user = userDoc.data();
+
+      return { id: decodedToken.uid, email: user?.email, role: user?.role };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
     }
-    return { id: user.id, username: user.username, role: user.role };
-  }
-
-  login(user: any) {
-    const payload = { username: user.username, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
   }
 }

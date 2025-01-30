@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { firestore } from '../firebase/firebase.config';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -15,11 +14,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const userId = payload.sub;
-    const user = await firestore.collection('users').doc(userId).get();
-    if (!user.exists) {
-      return null;
-    }
-    return user.data();
+    return { id: payload.id, username: payload.username, role: payload.role };
   }
 }
