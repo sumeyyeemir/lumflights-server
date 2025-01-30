@@ -1,99 +1,132 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# LumFlights API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<div align="center">
+  <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS">
+  <img src="https://img.shields.io/badge/Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firestore">
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
+  <img src="https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="Swagger">
+</div>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📖 Table of Contents
+- [Project Description](#-project-description)
+- [Features](#-features)
+- [Technologies](#-technologies)
+- [Setup](#-setup)
+- [API Documentation](#-api-documentation)
+- [Sample Scenarios](#-sample-scenarios)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🌟 Project Description
+LumFlights is a **flight reservation management** REST API project. It operates with a role-based authorization system for both admin and staff and provides AI-powered analytics.
 
-## Project setup
+![Swagger UI Preview](https://miro.medium.com/v2/resize:fit:1400/1*4bT3VJ7vE6mAbN-6m8Ljsw.png)
 
+---
+
+## 🚀 Features
+### Role-Based Access
+| Role   | Permissions                           |
+|--------|--------------------------------------|
+| Admin  | View all reservations and customer details |
+| Staff  | View only flight details |
+
+### Core Functions
+- 🔐 Authentication with JWT
+- ✈️ Create/List reservations
+- 📅 Filter by date range
+- 🤖 AI-powered reservation analysis
+
+---
+
+## 🛠 Technologies
+| Technology  | Description                         |
+|------------|---------------------------------|
+| **NestJS** | Server-side framework            |
+| **Firestore** | NoSQL database (Firebase)       |
+| **OpenAI** | AI integration                    |
+| **Swagger** | API documentation tool          |
+
+---
+
+## ⚙️ Setup
+### 1. Requirements
+- Node.js v18+
+- Firebase account
+- OpenAI API key
+
+### 2. Clone the Project
 ```bash
-$ npm install
+git clone https://github.com/sumeyyeemir/lumflights-api.git
+cd lumflights-api
 ```
 
-## Compile and run the project
-
+### 3. Install Dependencies
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 4. Firebase Configuration
+1. Create a project on Firebase Console
+2. Download the service account key (`firebase-admin-key.json`)
+3. Change file name (`serviceAccountkey.json`)
+4. Move the file to the project root
 
+### 5. Environment Variables
+Create a `.env` file:
+```env
+JWT_SECRET=your_jwt_secret_here
+JWT_EXPIRES_IN=1h
+OPENAI_API_KEY=your_openai_key_here
+```
+### 7. Start the Application
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+## 📚 API Documentation
+Swagger UI is automatically generated while the app is running:
+```
+http://localhost:3000/api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+![Swagger UI](https://static1.smartbear.co/swagger/media/assets/images/swagger_logo.png)
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🧪 Sample Scenarios
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 2. Create a Reservation
+```http
+POST /generate-bulk
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
 
-## Support
+{
+  "success": "true",
+  "count": 1000,
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## 🤝 Contributing
+1. Fork the repo (https://github.com/sumeyyeemir/lumflights-api/fork)
+2. Create a new branch (`git checkout -b feature/awesome-feature`)
+3. Commit your changes (`git commit -am 'Add awesome feature'`)
+4. Push to the branch (`git push origin feature/awesome-feature`)
+5. Open a Pull Request
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## 📜 License
+This project is distributed under the MIT license. See the [LICENSE](LICENSE) file for details.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+**🚨 Important Note:** Before using in a production environment, make sure to secure JWT_SECRET and other sensitive information!
+
