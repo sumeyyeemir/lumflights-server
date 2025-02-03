@@ -1,18 +1,31 @@
 import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
+import { Reflector } from '@nestjs/core';
+import { AuthService } from './auth.service';
+
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+  constructor(private reflector: Reflector, private readonly authService: AuthService) {
+    super();
+  }
 
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    
+    const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException('No token provided');
+      throw new UnauthorizedException('Token bulunamadı');
     }
 
-    return super.canActivate(context);
+    try {
+      const user = await this.authService.validateUser(token);
+      request.user = user;
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Yetkilendirme hatası');
+    }
   }
 
   private extractTokenFromHeader(request: any): string | null {

@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
-import {  Reservation } from 'src/reservations/models/reservation.model';
+import { Reservation } from 'src/reservations/models/reservation.model';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 @Injectable()
 export class OpenAIService {
-  static generateReservation() {
-    throw new Error('Method not implemented.');
-  }
   private openai: OpenAI;
+  private limiter = new RateLimiterMemory({
+    points: 60,
+    duration: 60,
+  });
 
   constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
@@ -23,7 +25,7 @@ export class OpenAIService {
       - Departure: ${reservation.departure}
       - Arrival: ${reservation.arrival}
       - Date: ${reservation.date}
-      - Passengers: ${reservation.passengers.map(p => p.name).join(', ')}
+      - Passengers: ${reservation.passengers.map((p) => p.name).join(', ')}
 
       Provide:
       1. Recommendations for the reservation.
@@ -32,14 +34,21 @@ export class OpenAIService {
       Format the output as a JSON array of strings.
     `;
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 200,
-    });
+    try {
+      await this.limiter.consume('openai-api'); 
 
-    const generatedText = response.choices[0].message.content || "";
-    return JSON.parse(generatedText);
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+      });
+
+      const generatedText = response.choices[0].message.content || '[]';
+      return JSON.parse(generatedText);
+    } catch (error) {
+      console.error('Error in generateAIComments:', error);
+      return [];
+    }
   }
 
   async generateReservation(): Promise<Reservation> {
@@ -67,17 +76,51 @@ export class OpenAIService {
       }
     `;
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 300,
-    });
+    const maxRetries = 5;
+    let attempt = 0;
 
-    const generatedText = response.choices[0].message.content || "";
-    const reservation = JSON.parse(generatedText) as Reservation;
+    while (attempt < maxRetries) {
+      try {
+        await this.limiter.consume('openai-api'); 
 
-    reservation.comments = await this.generateAIComments(reservation);
+        const response = await this.openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 300,
+        });
 
-    return reservation;
+        const generatedText = response.choices[0].message.content || '{}';
+        const reservation = JSON.parse(generatedText) as Reservation;
+
+        reservation.comments = await this.generateAIComments(reservation);
+        return reservation;
+      } catch (error) {
+        attempt++;
+
+        if (error instanceof Error) {
+          if (error.message.includes('rate limit')) {
+            const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+            console.warn(
+              `OpenAI rate limit. Retrying in ${Math.round(delay / 1000)}s`
+            );
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          } else {
+            console.error('Unexpected error:', error);
+            throw error;
+          }
+        } else {
+          console.warn(
+            `Local rate limit exceeded. Retrying in ${Math.round(
+              (error as any).msBeforeNext / 1000
+            )}s`
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, (error as any).msBeforeNext)
+          );
+        }
+      }
+    }
+
+    throw new Error(`Max retries (${maxRetries}) exceeded`);
   }
 }

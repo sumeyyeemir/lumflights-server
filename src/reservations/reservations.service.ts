@@ -23,7 +23,8 @@ export class ReservationsService {
     const snapshot = await query.get();
 
     if (snapshot.empty) {
-      return [];
+      return []
+      
     }
 
     return snapshot.docs.map((doc) => {
@@ -34,31 +35,77 @@ export class ReservationsService {
 
   async generateAndSaveReservations(): Promise<{ success: boolean; count: number }> {
     const reservationsCollection = firestore.collection('reservations');
-    const batch1 = firestore.batch(); 
-    const batch2 = firestore.batch();
-    const maxBatchSize = 500; // Firebase batch limit is 500 operations per batch
-    const promises: Promise<void>[] = [];
-  
-    for (let i = 0; i < 1000; i++) {
-      const promise = this.openaiService.generateReservation().then((reservation) => {
-        const reservationRef = reservationsCollection.doc();
-        if (i < maxBatchSize) {
-          batch1.set(reservationRef, { ...reservation, id: reservationRef.id });
-        } else {
-          batch2.set(reservationRef, { ...reservation, id: reservationRef.id });
+    const batchSize = 20; 
+    const totalReservations = 1000;
+    let generatedCount = 0;
+
+    for (let i = 0; i < totalReservations; i += batchSize) {
+      console.log(`Generating batch ${i + 1} to ${i + batchSize}...`);
+
+      const batch = firestore.batch();
+      const promises: Promise<Reservation>[] = [];
+
+      for (let j = 0; j < batchSize; j++) {
+        const promise = this.retryWithBackoff(() => this.openaiService.generateReservation(), 5);
+        promises.push(promise);
+      }
+
+      try {
+        const reservations = await Promise.all(promises);
+
+        for (const reservation of reservations) {
+          const reservationRef = reservationsCollection.doc();
+          batch.set(reservationRef, { ...reservation, id: reservationRef.id });
+          generatedCount++;
         }
-      });
-      promises.push(promise);
+
+        await batch.commit();
+        console.log(`✅ Batch ${i + 1} - ${i + batchSize} saved successfully.`);
+      } catch (error) {
+        console.error('🚨 Error generating reservations:', error);
+      }
+
+      console.log(`⏳ Waiting before next batch...`);
+      await this.sleep(10000); 
     }
-  
-    await Promise.all(promises);
-  
-    await batch1.commit();
-    await batch2.commit();
-  
+
     return {
       success: true,
-      count: 1000,
+      count: generatedCount,
     };
   }
+
+  /** 
+   * OpenAI rate limit hatalarında bekleyerek tekrar deneme (Exponential Backoff)
+   */
+  private async retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: number): Promise<T> {
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        return await fn();
+      } catch (error) {
+        attempt++;
+
+        if (error instanceof Error && error.message.includes('rate limit')) {
+          const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+          console.warn(`🔄 OpenAI rate limit. Retrying in ${Math.round(delay / 1000)}s`);
+          await this.sleep(delay);
+        } else {
+          console.error('❌ Unexpected error:', error);
+          throw error;
+        }
+      }
+    }
+
+    throw new Error(`🚨 Max retries (${maxRetries}) exceeded`);
+  }
+
+  /**
+   * Belirtilen süre boyunca bekleyen yardımcı fonksiyon
+   */
+  private async sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  
 }

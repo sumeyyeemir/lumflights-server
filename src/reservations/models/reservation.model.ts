@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Passenger {
-  id: string;
+  //id: string;
   name: string;
   age: number;
   seatNumber: string;
