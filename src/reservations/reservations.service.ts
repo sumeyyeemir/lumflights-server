@@ -23,7 +23,84 @@ export class ReservationsService {
     const snapshot = await query.get();
 
     if (snapshot.empty) {
-      return []
+      return [
+        {
+          "id": "1",
+          "flightNumber": "AB1234",
+          "departure": "New York",
+          "arrival": "London",
+          "date": "2023-12-25T12:00:00.000Z",
+          "passengers": [
+            {
+              "name": "John Doe",
+              "age": 30,
+              "seatNumber": "A1"
+            }
+          ],
+          "comments": [
+            "AI Analysis: This reservation has optimal flight timing.",
+            "Recommendation: Consider upgrading to premium class.",
+            "Risk Assessment: Low cancellation probability (12%)."
+          ]
+        },
+        {
+          "id": "2",
+          "flightNumber": "AB1234",
+          "departure": "New York",
+          "arrival": "London",
+          "date": "2023-12-25T12:00:00.000Z",
+          "passengers": [
+            {
+              "name": "John Doe",
+              "age": 30,
+              "seatNumber": "A1"
+            }
+          ],
+          "comments": [
+            "AI Analysis: This reservation has optimal flight timing.",
+            "Recommendation: Consider upgrading to premium class.",
+            "Risk Assessment: Low cancellation probability (12%)."
+          ]
+        },
+        {
+          "id": "3",
+          "flightNumber": "AB1234",
+          "departure": "New York",
+          "arrival": "London",
+          "date": "2023-12-25T12:00:00.000Z",
+          "passengers": [
+            {
+              "name": "John Doe",
+              "age": 30,
+              "seatNumber": "A1"
+            }
+          ],
+          "comments": [
+            "AI Analysis: This reservation has optimal flight timing.",
+            "Recommendation: Consider upgrading to premium class.",
+            "Risk Assessment: Low cancellation probability (12%)."
+          ]
+        },
+        {
+          "id": "4",
+          "flightNumber": "AB1234",
+          "departure": "New York",
+          "arrival": "London",
+          "date": "2023-12-25T12:00:00.000Z",
+          "passengers": [
+            {
+              "name": "John Doe",
+              "age": 30,
+              "seatNumber": "A1"
+            }
+          ],
+          "comments": [
+            "AI Analysis: This reservation has optimal flight timing.",
+            "Recommendation: Consider upgrading to premium class.",
+            "Risk Assessment: Low cancellation probability (12%)."
+          ]
+        }
+      ]
       
     }
 
